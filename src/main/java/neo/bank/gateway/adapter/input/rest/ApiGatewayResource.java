@@ -17,10 +17,13 @@ import jakarta.ws.rs.PUT;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.PathParam;
 import jakarta.ws.rs.Produces;
+import jakarta.ws.rs.WebApplicationException;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import lombok.extern.slf4j.Slf4j;
 import neo.bank.gateway.adapter.input.rest.request.CreaContoCorrenteRequest;
+import neo.bank.gateway.adapter.input.rest.request.ImpostaSogliaBonificoRequest;
+import neo.bank.gateway.adapter.input.rest.request.InviaBonificoRequest;
 import neo.bank.gateway.adapter.input.rest.request.LoginUtenteRequest;
 import neo.bank.gateway.adapter.input.rest.request.RegistraUtenteRequest;
 import neo.bank.gateway.adapter.input.rest.request.RichiediAggiornamentoEmailRequest;
@@ -29,6 +32,8 @@ import neo.bank.gateway.adapter.input.rest.request.RichiediAggiornamentoTelefono
 import neo.bank.gateway.adapter.output.rest.AuthRestClient;
 import neo.bank.gateway.adapter.output.rest.ClienteRestClient;
 import neo.bank.gateway.adapter.output.rest.ContoCorrenteRestClient;
+import neo.bank.gateway.adapter.output.rest.request.ImpostaSogliaBonificoClientRequest;
+import neo.bank.gateway.adapter.output.rest.request.InviaBonificoClientRequest;
 
 @Path("/api/v1")
 @Slf4j
@@ -169,12 +174,59 @@ public class ApiGatewayResource {
     @Path("/cc")
     @POST
     @Produces(value = MediaType.APPLICATION_JSON)
+    @RolesAllowed("cliente")
     public Response creaContoCorrente() {
         log.info(("Inoltro richiesta apertura di un nuovo conto corrente"));
         String username = identity.getPrincipal().getName();
         return ccRestClient.creaContoCorrente(new CreaContoCorrenteRequest(username));
         }
 
+    
+    @Path("/cc/soglia-bonifico-giornaliera")
+    @PUT
+    @Produces(value = MediaType.APPLICATION_JSON)
+    @RolesAllowed("cliente")
+    public Response impostaSogliaBonificoGiornaliera( ImpostaSogliaBonificoRequest request){
+        try {
+            log.info(("Inoltro richiesta aggiornamento soglia bonifico giornaliera"));
+            String username = identity.getPrincipal().getName();
+            return ccRestClient.impostaSogliaBonificoGiornaliera(new ImpostaSogliaBonificoClientRequest(request.getIban(), username, request.getNuovaSoglia()));
+        } catch (WebApplicationException ex) {
+            log.error("Errore durante l'aggiornamento della soglia bonifico giornaliera", ex.getMessage());
+            return ex.getResponse();
+        }
+    }
+
+    @Path("/cc/soglia-bonifico-mensile")
+    @PUT
+    @Produces(value = MediaType.APPLICATION_JSON)
+    @RolesAllowed("cliente")
+    public Response impostaSogliaBonificoMensile(ImpostaSogliaBonificoRequest request){
+        try {
+            log.info(("Inoltro richiesta aggiornamento soglia bonifico mensile"));
+            String username = identity.getPrincipal().getName();
+            return ccRestClient.impostaSogliaBonificoMensile(new ImpostaSogliaBonificoClientRequest(request.getIban(), username, request.getNuovaSoglia()));
+        } catch (WebApplicationException ex) {
+            log.error("Errore durante l'aggiornamento della soglia bonifico mensile", ex.getMessage());
+            return ex.getResponse();
+        }
+        
+    }
+
+    @Path("/cc/predisponi-bonifico")
+    @POST
+    @Produces(value = MediaType.APPLICATION_JSON)
+    @RolesAllowed("cliente")
+    public Response predisponiBonifico(InviaBonificoRequest request) {
+        try {
+            log.info(("Inoltro richiesta predisposizione bonifico"));
+            String username = identity.getPrincipal().getName();
+            return ccRestClient.predisponiBonifico(new InviaBonificoClientRequest(username, request.getIbanMittente(), request.getIbanDestinatario(), request.getImporto(), username));
+        } catch (WebApplicationException ex) {
+            log.error("Errore durante la predisposizione del bonifico", ex.getMessage());
+            return ex.getResponse();
+        }
+    }
     //****************************************************************************** */
 
     private String getToken(SecurityIdentity identity) {
