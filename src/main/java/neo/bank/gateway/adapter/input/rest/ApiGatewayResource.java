@@ -174,6 +174,7 @@ public class ApiGatewayResource {
     @Path("/cc")
     @POST
     @Produces(value = MediaType.APPLICATION_JSON)
+    @Tag(name="Endpoints Conti Correnti")
     @RolesAllowed("cliente")
     public Response creaContoCorrente() {
         log.info(("Inoltro richiesta apertura di un nuovo conto corrente"));
@@ -185,6 +186,7 @@ public class ApiGatewayResource {
     @Path("/cc/soglia-bonifico-giornaliera")
     @PUT
     @Produces(value = MediaType.APPLICATION_JSON)
+    @Tag(name="Endpoints Conti Correnti")
     @RolesAllowed("cliente")
     public Response impostaSogliaBonificoGiornaliera( ImpostaSogliaBonificoRequest request){
         try {
@@ -200,6 +202,7 @@ public class ApiGatewayResource {
     @Path("/cc/soglia-bonifico-mensile")
     @PUT
     @Produces(value = MediaType.APPLICATION_JSON)
+    @Tag(name="Endpoints Conti Correnti")
     @RolesAllowed("cliente")
     public Response impostaSogliaBonificoMensile(ImpostaSogliaBonificoRequest request){
         try {
@@ -216,6 +219,7 @@ public class ApiGatewayResource {
     @Path("/cc/predisponi-bonifico")
     @POST
     @Produces(value = MediaType.APPLICATION_JSON)
+    @Tag(name="Endpoints Conti Correnti")
     @RolesAllowed("cliente")
     public Response predisponiBonifico(InviaBonificoRequest request) {
         try {
