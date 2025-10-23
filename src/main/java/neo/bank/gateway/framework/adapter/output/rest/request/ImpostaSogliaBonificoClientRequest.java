@@ -1,4 +1,4 @@
-package neo.bank.gateway.adapter.output.rest.request;
+package neo.bank.gateway.framework.adapter.output.rest.request;
 
 import lombok.Value;
 

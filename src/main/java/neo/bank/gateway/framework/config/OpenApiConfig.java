@@ -1,4 +1,4 @@
-package neo.bank.gateway.config;
+package neo.bank.gateway.framework.config;
 
 import org.eclipse.microprofile.openapi.annotations.enums.SecuritySchemeType;
 import org.eclipse.microprofile.openapi.annotations.security.SecurityScheme;

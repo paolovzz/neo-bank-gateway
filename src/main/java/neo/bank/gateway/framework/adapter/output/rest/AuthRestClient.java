@@ -1,4 +1,4 @@
-package neo.bank.gateway.adapter.output.rest;
+package neo.bank.gateway.framework.adapter.output.rest;
 
 
 import org.eclipse.microprofile.openapi.annotations.parameters.RequestBody;
@@ -10,8 +10,8 @@ import jakarta.ws.rs.POST;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
-import neo.bank.gateway.adapter.input.rest.request.LoginUtenteRequest;
-import neo.bank.gateway.adapter.input.rest.request.RegistraUtenteRequest;
+import neo.bank.gateway.framework.adapter.input.rest.request.LoginUtenteRequest;
+import neo.bank.gateway.framework.adapter.input.rest.request.RegistraUtenteRequest;
 
 @Path("/auth")
 @RegisterRestClient(configKey = "auth-service")

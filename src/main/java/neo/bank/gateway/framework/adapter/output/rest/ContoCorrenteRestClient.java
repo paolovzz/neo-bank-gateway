@@ -1,4 +1,4 @@
-package neo.bank.gateway.adapter.output.rest;
+package neo.bank.gateway.framework.adapter.output.rest;
 
 
 import org.eclipse.microprofile.rest.client.inject.RegisterRestClient;
@@ -11,9 +11,9 @@ import jakarta.ws.rs.PathParam;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
-import neo.bank.gateway.adapter.input.rest.request.CreaContoCorrenteRequest;
-import neo.bank.gateway.adapter.output.rest.request.ImpostaSogliaBonificoClientRequest;
-import neo.bank.gateway.adapter.output.rest.request.InviaBonificoClientRequest;
+import neo.bank.gateway.framework.adapter.input.rest.request.CreaContoCorrenteRequest;
+import neo.bank.gateway.framework.adapter.output.rest.request.ImpostaSogliaBonificoClientRequest;
+import neo.bank.gateway.framework.adapter.output.rest.request.InviaBonificoClientRequest;
 
 @Path("/cc")
 @RegisterRestClient(configKey = "conto-corrente-service")

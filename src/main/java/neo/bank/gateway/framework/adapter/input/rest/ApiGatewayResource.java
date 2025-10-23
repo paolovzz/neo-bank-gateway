@@ -1,4 +1,4 @@
-package neo.bank.gateway.adapter.input.rest;
+package neo.bank.gateway.framework.adapter.input.rest;
 
 import java.security.Principal;
 
@@ -21,19 +21,28 @@ import jakarta.ws.rs.WebApplicationException;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import lombok.extern.slf4j.Slf4j;
-import neo.bank.gateway.adapter.input.rest.request.CreaContoCorrenteRequest;
-import neo.bank.gateway.adapter.input.rest.request.ImpostaSogliaBonificoRequest;
-import neo.bank.gateway.adapter.input.rest.request.InviaBonificoRequest;
-import neo.bank.gateway.adapter.input.rest.request.LoginUtenteRequest;
-import neo.bank.gateway.adapter.input.rest.request.RegistraUtenteRequest;
-import neo.bank.gateway.adapter.input.rest.request.RichiediAggiornamentoEmailRequest;
-import neo.bank.gateway.adapter.input.rest.request.RichiediAggiornamentoResidenzaRequest;
-import neo.bank.gateway.adapter.input.rest.request.RichiediAggiornamentoTelefonoRequest;
-import neo.bank.gateway.adapter.output.rest.AuthRestClient;
-import neo.bank.gateway.adapter.output.rest.ClienteRestClient;
-import neo.bank.gateway.adapter.output.rest.ContoCorrenteRestClient;
-import neo.bank.gateway.adapter.output.rest.request.ImpostaSogliaBonificoClientRequest;
-import neo.bank.gateway.adapter.output.rest.request.InviaBonificoClientRequest;
+import neo.bank.gateway.framework.adapter.input.rest.request.CreaCartaRequest;
+import neo.bank.gateway.framework.adapter.input.rest.request.CreaContoCorrenteRequest;
+import neo.bank.gateway.framework.adapter.input.rest.request.ImpostaAbilitazionePagamentiOnlineRequest;
+import neo.bank.gateway.framework.adapter.input.rest.request.ImpostaSogliaBonificoRequest;
+import neo.bank.gateway.framework.adapter.input.rest.request.ImpostaSogliaPagamentiRequest;
+import neo.bank.gateway.framework.adapter.input.rest.request.ImpostaStatoCartaRequest;
+import neo.bank.gateway.framework.adapter.input.rest.request.InviaBonificoRequest;
+import neo.bank.gateway.framework.adapter.input.rest.request.LoginUtenteRequest;
+import neo.bank.gateway.framework.adapter.input.rest.request.RegistraUtenteRequest;
+import neo.bank.gateway.framework.adapter.input.rest.request.RichiediAggiornamentoEmailRequest;
+import neo.bank.gateway.framework.adapter.input.rest.request.RichiediAggiornamentoResidenzaRequest;
+import neo.bank.gateway.framework.adapter.input.rest.request.RichiediAggiornamentoTelefonoRequest;
+import neo.bank.gateway.framework.adapter.output.rest.AuthRestClient;
+import neo.bank.gateway.framework.adapter.output.rest.CartaRestClient;
+import neo.bank.gateway.framework.adapter.output.rest.ClienteRestClient;
+import neo.bank.gateway.framework.adapter.output.rest.ContoCorrenteRestClient;
+import neo.bank.gateway.framework.adapter.output.rest.request.CreaCartaClientRequest;
+import neo.bank.gateway.framework.adapter.output.rest.request.ImpostaAbilitazionePagamentiOnlineClientRequest;
+import neo.bank.gateway.framework.adapter.output.rest.request.ImpostaSogliaBonificoClientRequest;
+import neo.bank.gateway.framework.adapter.output.rest.request.ImpostaSogliaPagamentiClientRequest;
+import neo.bank.gateway.framework.adapter.output.rest.request.ImpostaStatoCartaClientRequest;
+import neo.bank.gateway.framework.adapter.output.rest.request.InviaBonificoClientRequest;
 
 @Path("/api/v1")
 @Slf4j
@@ -51,11 +60,15 @@ public class ApiGatewayResource {
     @RestClient
     private final ContoCorrenteRestClient ccRestClient;
 
+    @RestClient
+    private final CartaRestClient cartaRestClient;
+
     @Inject
-    public ApiGatewayResource(@RestClient AuthRestClient authRestClient, @RestClient ClienteRestClient clienteRestClient, @RestClient ContoCorrenteRestClient ccRestClient) {
+    public ApiGatewayResource(@RestClient AuthRestClient authRestClient, @RestClient ClienteRestClient clienteRestClient, @RestClient ContoCorrenteRestClient ccRestClient, @RestClient CartaRestClient cartaRestClient) {
         this.authRestClient = authRestClient;
         this.clienteRestClient = clienteRestClient;
         this.ccRestClient = ccRestClient;
+        this.cartaRestClient = cartaRestClient;
     }
 
     /**********************************************
@@ -155,9 +168,6 @@ public class ApiGatewayResource {
         return Response.noContent().build();
     }
 
-
-
-
     /**********************************************
      *  API CONTO CORRENTE
      *********************************************/
@@ -228,6 +238,97 @@ public class ApiGatewayResource {
             return ccRestClient.predisponiBonifico(new InviaBonificoClientRequest(username, request.getIbanMittente(), request.getIbanDestinatario(), request.getImporto(), username));
         } catch (WebApplicationException ex) {
             log.error("Errore durante la predisposizione del bonifico", ex.getMessage());
+            return ex.getResponse();
+        }
+    }
+
+
+    /**********************************************
+     *  API CARTA
+     *********************************************/
+
+    @GET
+    @Path("/carte/{numeroCarta}")
+    @Tag(name="Endpoints Carte")
+    @RolesAllowed("cliente")
+    public Response recuperaDatiCarta(@PathParam(value = "numeroCarta") String numeroCarta) {
+        log.info(("Inoltro richiesta recupero dati carta"));
+        return cartaRestClient.recuperaCartaDaNumeroCarta(numeroCarta);
+    }
+
+    @Path("/carte")
+    @POST
+    @Produces(value = MediaType.APPLICATION_JSON)
+     @Tag(name="Endpoints Carte")
+    @RolesAllowed("cliente")
+    public Response creaCarta(CreaCartaRequest request) {
+        log.info(("Inoltro richiesta creazione di una nuova carta"));
+        String username = identity.getPrincipal().getName();
+        return cartaRestClient.creaCarta(new CreaCartaClientRequest(username, request.getIban()));
+        }
+
+    
+    @Path("/carte/soglia-pagamenti-giornaliera")
+    @PUT
+    @Produces(value = MediaType.APPLICATION_JSON)
+    @Tag(name="Endpoints Carte")
+    @RolesAllowed("cliente")
+    public Response impostaSogliaPagamentiGiornaliera( ImpostaSogliaPagamentiRequest request){
+        try {
+            log.info(("Inoltro richiesta aggiornamento soglia pagamenti giornaliera"));
+            String username = identity.getPrincipal().getName();
+            return cartaRestClient.impostaSogliaPagamentiGiornaliera(new ImpostaSogliaPagamentiClientRequest(request.getNumeroCarta(), request.getIban(), username, request.getNuovaSoglia()));
+        } catch (WebApplicationException ex) {
+            log.error("Errore durante l'aggiornamento della soglia bonifico giornaliera", ex.getMessage());
+            return ex.getResponse();
+        }
+    }
+
+    @Path("/carte/soglia-pagamenti-mensile")
+    @PUT
+    @Produces(value = MediaType.APPLICATION_JSON)
+    @Tag(name="Endpoints Carte")
+    @RolesAllowed("cliente")
+    public Response impostaSogliaPagamentiMensile( ImpostaSogliaPagamentiRequest request){
+        try {
+            log.info(("Inoltro richiesta aggiornamento soglia pagamenti mensile"));
+            String username = identity.getPrincipal().getName();
+            return cartaRestClient.impostaSogliaPagamentiMensile(new ImpostaSogliaPagamentiClientRequest(request.getNumeroCarta(), request.getIban(), username, request.getNuovaSoglia()));
+        } catch (WebApplicationException ex) {
+            log.error("Errore durante l'aggiornamento della soglia bonifico giornaliera", ex.getMessage());
+            return ex.getResponse();
+        }
+    }
+
+
+    @Path("/carte/abilitazione-pagamenti-online")
+    @PUT
+    @Tag(name="Endpoints Carte")
+    @RolesAllowed("cliente")
+    @Produces(value = MediaType.APPLICATION_JSON)
+    public Response impostaAbilitazionePagamentiOnline( ImpostaAbilitazionePagamentiOnlineRequest request) {
+        try {
+            log.info(("Inoltro richiesta settaggio abilitazione pagamenti online"));
+            String username = identity.getPrincipal().getName();
+            return cartaRestClient.impostaAbilitazionePagamentiOnline(new ImpostaAbilitazionePagamentiOnlineClientRequest(request.getNumeroCarta(), request.getIban(), username, request.isAbilitazionePagamentiOnline()));
+        } catch (WebApplicationException ex) {
+            log.error("Errore durante l'aggiornamento della soglia bonifico giornaliera", ex.getMessage());
+            return ex.getResponse();
+        }
+    }
+
+    @Path("/carte/stato-carta")
+    @PUT
+    @Tag(name="Endpoints Carte")
+    @RolesAllowed("cliente")
+    @Produces(value = MediaType.APPLICATION_JSON)
+    public Response impostaStatoCarta( ImpostaStatoCartaRequest request) {
+        try {
+            log.info(("Inoltro richiesta settaggio stato della carta"));
+            String username = identity.getPrincipal().getName();
+            return cartaRestClient.impostaStatoCarta(new ImpostaStatoCartaClientRequest(request.getNumeroCarta(), request.getIban(), username, request.isStatoCarta()));
+        } catch (WebApplicationException ex) {
+            log.error("Errore durante l'aggiornamento della soglia bonifico giornaliera", ex.getMessage());
             return ex.getResponse();
         }
     }
