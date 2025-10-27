@@ -49,4 +49,8 @@ public interface CartaRestClient {
     @Produces(value = MediaType.APPLICATION_JSON)
     public Response impostaStatoCarta( ImpostaStatoCartaClientRequest request);
     
+    @Path("/iban/{iban}")
+    @GET
+    @Produces(value = MediaType.APPLICATION_JSON)
+    public Response recuperaCarteDaIban(@PathParam(value = "iban") String iban);
 }

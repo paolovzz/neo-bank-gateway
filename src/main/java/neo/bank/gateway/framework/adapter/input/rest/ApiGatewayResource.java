@@ -256,6 +256,15 @@ public class ApiGatewayResource {
         return cartaRestClient.recuperaCartaDaNumeroCarta(numeroCarta);
     }
 
+    @GET
+    @Path("/carte/iban/{iban}")
+    @Tag(name="Endpoints Carte")
+    @RolesAllowed("cliente")
+    public Response recuperaCarteDaIban(@PathParam(value = "iban") String iban) {
+        log.info(("Inoltro richiesta recupero carte da iban"));
+        return cartaRestClient.recuperaCarteDaIban(iban);
+    }
+
     @Path("/carte")
     @POST
     @Produces(value = MediaType.APPLICATION_JSON)
@@ -324,11 +333,11 @@ public class ApiGatewayResource {
     @Produces(value = MediaType.APPLICATION_JSON)
     public Response impostaStatoCarta( ImpostaStatoCartaRequest request) {
         try {
-            log.info(("Inoltro richiesta settaggio stato della carta"));
+            log.info("Inoltro richiesta settaggio stato della carta");
             String username = identity.getPrincipal().getName();
             return cartaRestClient.impostaStatoCarta(new ImpostaStatoCartaClientRequest(request.getNumeroCarta(), request.getIban(), username, request.isStatoCarta()));
         } catch (WebApplicationException ex) {
-            log.error("Errore durante l'aggiornamento della soglia bonifico giornaliera", ex.getMessage());
+            log.error("Errore durante l'aggiornamento dello stato della carta", ex.getMessage());
             return ex.getResponse();
         }
     }
