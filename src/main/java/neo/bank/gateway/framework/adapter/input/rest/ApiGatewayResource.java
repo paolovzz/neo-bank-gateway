@@ -235,7 +235,7 @@ public class ApiGatewayResource {
         try {
             log.info(("Inoltro richiesta predisposizione bonifico"));
             String username = identity.getPrincipal().getName();
-            return ccRestClient.predisponiBonifico(new InviaBonificoClientRequest(username, request.getIbanMittente(), request.getIbanDestinatario(), request.getImporto(), username));
+            return ccRestClient.predisponiBonifico(new InviaBonificoClientRequest(username, request.getIbanMittente(), request.getIbanDestinatario(), request.getImporto(), request.getCausale()));
         } catch (WebApplicationException ex) {
             log.error("Errore durante la predisposizione del bonifico", ex.getMessage());
             return ex.getResponse();
