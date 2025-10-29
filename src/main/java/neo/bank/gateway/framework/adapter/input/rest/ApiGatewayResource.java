@@ -1,6 +1,7 @@
 package neo.bank.gateway.framework.adapter.input.rest;
 
 import java.security.Principal;
+import java.time.LocalDate;
 
 import org.eclipse.microprofile.openapi.annotations.parameters.RequestBody;
 import org.eclipse.microprofile.openapi.annotations.tags.Tag;
@@ -11,16 +12,19 @@ import io.smallrye.jwt.auth.principal.JWTCallerPrincipal;
 import jakarta.annotation.security.RolesAllowed;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.Consumes;
+import jakarta.ws.rs.DefaultValue;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.POST;
 import jakarta.ws.rs.PUT;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.PathParam;
 import jakarta.ws.rs.Produces;
+import jakarta.ws.rs.QueryParam;
 import jakarta.ws.rs.WebApplicationException;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import lombok.extern.slf4j.Slf4j;
+import neo.bank.gateway.domain.enums.TipologiaFlusso;
 import neo.bank.gateway.framework.adapter.input.rest.request.CreaCartaRequest;
 import neo.bank.gateway.framework.adapter.input.rest.request.CreaContoCorrenteRequest;
 import neo.bank.gateway.framework.adapter.input.rest.request.ImpostaAbilitazionePagamentiOnlineRequest;
@@ -37,6 +41,7 @@ import neo.bank.gateway.framework.adapter.output.rest.AuthRestClient;
 import neo.bank.gateway.framework.adapter.output.rest.CartaRestClient;
 import neo.bank.gateway.framework.adapter.output.rest.ClienteRestClient;
 import neo.bank.gateway.framework.adapter.output.rest.ContoCorrenteRestClient;
+import neo.bank.gateway.framework.adapter.output.rest.TransazioneRestClient;
 import neo.bank.gateway.framework.adapter.output.rest.request.CreaCartaClientRequest;
 import neo.bank.gateway.framework.adapter.output.rest.request.ImpostaAbilitazionePagamentiOnlineClientRequest;
 import neo.bank.gateway.framework.adapter.output.rest.request.ImpostaSogliaBonificoClientRequest;
@@ -63,12 +68,16 @@ public class ApiGatewayResource {
     @RestClient
     private final CartaRestClient cartaRestClient;
 
+    @RestClient
+    private final TransazioneRestClient transazioneRestClient;
+
     @Inject
-    public ApiGatewayResource(@RestClient AuthRestClient authRestClient, @RestClient ClienteRestClient clienteRestClient, @RestClient ContoCorrenteRestClient ccRestClient, @RestClient CartaRestClient cartaRestClient) {
+    public ApiGatewayResource(@RestClient AuthRestClient authRestClient, @RestClient ClienteRestClient clienteRestClient, @RestClient ContoCorrenteRestClient ccRestClient, @RestClient CartaRestClient cartaRestClient, @RestClient TransazioneRestClient transazioneRestClient) {
         this.authRestClient = authRestClient;
         this.clienteRestClient = clienteRestClient;
         this.ccRestClient = ccRestClient;
         this.cartaRestClient = cartaRestClient;
+        this.transazioneRestClient = transazioneRestClient;
     }
 
     /**********************************************
@@ -340,6 +349,36 @@ public class ApiGatewayResource {
             log.error("Errore durante l'aggiornamento dello stato della carta", ex.getMessage());
             return ex.getResponse();
         }
+    }
+
+
+
+    /**********************************************
+     *  API TRANSAZIONI
+     *********************************************/
+
+    @GET
+    @Path("/transazioni/iban/{iban}")
+    @Tag(name="Endpoints Transazioni")
+    @RolesAllowed("cliente")
+    public Response recuperaTransazioni(
+        @PathParam(value = "iban") String iban, 
+        @QueryParam(value = "dataCreazioneMin" ) LocalDate dataCreazioneMin,
+        @QueryParam(value = "dataCreazioneMax" ) LocalDate dataCreazioneMax,
+        @QueryParam(value = "tipologiaFlusso" ) TipologiaFlusso tipologiaFlusso,
+        @QueryParam(value = "importoMin" ) Double importoMin,
+        @QueryParam(value = "importoMax" ) Double importoMax,
+        @QueryParam(value = "numeroPagina") @DefaultValue("0") Integer numeroPagina,
+        @QueryParam(value = "dimensionePagina") @DefaultValue("10") Integer dimensionePagina) {
+        
+        try {
+            log.info("Inoltro richiesta transazioni");
+            return transazioneRestClient.recuperaTransazioni(iban, dataCreazioneMin, dataCreazioneMax, tipologiaFlusso, importoMin, importoMax, numeroPagina, dimensionePagina);
+        } catch (WebApplicationException ex) {
+            log.error("Errore durante l'aggiornamento dello stato della carta", ex.getMessage());
+            return ex.getResponse();
+        }
+        
     }
     //****************************************************************************** */
 
