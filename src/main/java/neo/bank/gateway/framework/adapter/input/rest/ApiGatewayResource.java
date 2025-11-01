@@ -41,7 +41,6 @@ import neo.bank.gateway.framework.adapter.output.rest.AuthRestClient;
 import neo.bank.gateway.framework.adapter.output.rest.CartaRestClient;
 import neo.bank.gateway.framework.adapter.output.rest.ClienteRestClient;
 import neo.bank.gateway.framework.adapter.output.rest.ContoCorrenteRestClient;
-import neo.bank.gateway.framework.adapter.output.rest.TransazioneRestClient;
 import neo.bank.gateway.framework.adapter.output.rest.request.CreaCartaClientRequest;
 import neo.bank.gateway.framework.adapter.output.rest.request.ImpostaAbilitazionePagamentiOnlineClientRequest;
 import neo.bank.gateway.framework.adapter.output.rest.request.ImpostaSogliaBonificoClientRequest;
@@ -68,16 +67,13 @@ public class ApiGatewayResource {
     @RestClient
     private final CartaRestClient cartaRestClient;
 
-    @RestClient
-    private final TransazioneRestClient transazioneRestClient;
 
     @Inject
-    public ApiGatewayResource(@RestClient AuthRestClient authRestClient, @RestClient ClienteRestClient clienteRestClient, @RestClient ContoCorrenteRestClient ccRestClient, @RestClient CartaRestClient cartaRestClient, @RestClient TransazioneRestClient transazioneRestClient) {
+    public ApiGatewayResource(@RestClient AuthRestClient authRestClient, @RestClient ClienteRestClient clienteRestClient, @RestClient ContoCorrenteRestClient ccRestClient, @RestClient CartaRestClient cartaRestClient) {
         this.authRestClient = authRestClient;
         this.clienteRestClient = clienteRestClient;
         this.ccRestClient = ccRestClient;
         this.cartaRestClient = cartaRestClient;
-        this.transazioneRestClient = transazioneRestClient;
     }
 
     /**********************************************
@@ -252,6 +248,31 @@ public class ApiGatewayResource {
     }
 
 
+    @GET
+    @Path("/cc/{iban}/transazioni")
+    @Tag(name="Endpoints Conti Correnti")
+    @RolesAllowed("cliente")
+    public Response recuperaTransazioni(
+        @PathParam(value = "iban") String iban, 
+        @QueryParam(value = "dataCreazioneMin" ) LocalDate dataCreazioneMin,
+        @QueryParam(value = "dataCreazioneMax" ) LocalDate dataCreazioneMax,
+        @QueryParam(value = "tipologiaFlusso" ) TipologiaFlusso tipologiaFlusso,
+        @QueryParam(value = "importoMin" ) Double importoMin,
+        @QueryParam(value = "importoMax" ) Double importoMax,
+        @QueryParam(value = "numeroPagina") @DefaultValue("0") Integer numeroPagina,
+        @QueryParam(value = "dimensionePagina") @DefaultValue("10") Integer dimensionePagina) {
+        
+        try {
+            log.info("Inoltro richiesta recupero transazioni");
+            String username = identity.getPrincipal().getName();
+            return ccRestClient.recuperaTransazioni(username, iban, dataCreazioneMin, dataCreazioneMax, tipologiaFlusso, importoMin, importoMax, numeroPagina, dimensionePagina);
+        } catch (WebApplicationException ex) {
+            log.error("Errore durante l'aggiornamento dello stato della carta", ex.getMessage());
+            return ex.getResponse();
+        }
+        
+    }
+
     /**********************************************
      *  API CARTA
      *********************************************/
@@ -353,33 +374,6 @@ public class ApiGatewayResource {
 
 
 
-    /**********************************************
-     *  API TRANSAZIONI
-     *********************************************/
-
-    @GET
-    @Path("/transazioni/iban/{iban}")
-    @Tag(name="Endpoints Transazioni")
-    @RolesAllowed("cliente")
-    public Response recuperaTransazioni(
-        @PathParam(value = "iban") String iban, 
-        @QueryParam(value = "dataCreazioneMin" ) LocalDate dataCreazioneMin,
-        @QueryParam(value = "dataCreazioneMax" ) LocalDate dataCreazioneMax,
-        @QueryParam(value = "tipologiaFlusso" ) TipologiaFlusso tipologiaFlusso,
-        @QueryParam(value = "importoMin" ) Double importoMin,
-        @QueryParam(value = "importoMax" ) Double importoMax,
-        @QueryParam(value = "numeroPagina") @DefaultValue("0") Integer numeroPagina,
-        @QueryParam(value = "dimensionePagina") @DefaultValue("10") Integer dimensionePagina) {
-        
-        try {
-            log.info("Inoltro richiesta transazioni");
-            return transazioneRestClient.recuperaTransazioni(iban, dataCreazioneMin, dataCreazioneMax, tipologiaFlusso, importoMin, importoMax, numeroPagina, dimensionePagina);
-        } catch (WebApplicationException ex) {
-            log.error("Errore durante l'aggiornamento dello stato della carta", ex.getMessage());
-            return ex.getResponse();
-        }
-        
-    }
     //****************************************************************************** */
 
     private String getToken(SecurityIdentity identity) {
