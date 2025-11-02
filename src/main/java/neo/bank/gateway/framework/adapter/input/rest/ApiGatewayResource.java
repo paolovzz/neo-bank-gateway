@@ -26,7 +26,6 @@ import jakarta.ws.rs.core.Response;
 import lombok.extern.slf4j.Slf4j;
 import neo.bank.gateway.domain.enums.TipologiaFlusso;
 import neo.bank.gateway.framework.adapter.input.rest.request.CreaCartaRequest;
-import neo.bank.gateway.framework.adapter.input.rest.request.CreaContoCorrenteRequest;
 import neo.bank.gateway.framework.adapter.input.rest.request.ImpostaAbilitazionePagamentiOnlineRequest;
 import neo.bank.gateway.framework.adapter.input.rest.request.ImpostaSogliaBonificoRequest;
 import neo.bank.gateway.framework.adapter.input.rest.request.ImpostaSogliaPagamentiRequest;
@@ -86,7 +85,13 @@ public class ApiGatewayResource {
     public Response signin(@RequestBody RegistraUtenteRequest request) {
 
         log.info(("Inoltro richiesta registrazione utente"));
-        return authRestClient.registraUtente(request);
+        try {
+            return authRestClient.registraUtente(request);
+        } catch(WebApplicationException ex) {
+            log.error("Errore durante la chiamata", ex);
+            return ex.getResponse();
+        }
+        
     }
 
     @POST
@@ -94,9 +99,13 @@ public class ApiGatewayResource {
     @Tag(name="Endpoints IAM")
     @Consumes(MediaType.APPLICATION_JSON)
     public Response login(@RequestBody LoginUtenteRequest request) {
-
-        log.info(("Inoltro richiesta login utente"));
-        return authRestClient.login(request);
+        try {
+            log.info(("Inoltro richiesta login utente"));
+            return authRestClient.login(request);
+        } catch(WebApplicationException ex) {
+            log.error("Errore durante la chiamata", ex);
+            return ex.getResponse();
+        }
     }
 
     @POST
@@ -104,9 +113,14 @@ public class ApiGatewayResource {
     @Tag(name="Endpoints IAM")
     @RolesAllowed("cliente")
     public Response logout() {
-
-        log.info(("Inoltro richiesta logout utente"));
-        return authRestClient.logout(getToken(identity));
+        try {
+            log.info(("Inoltro richiesta logout utente"));
+            return authRestClient.logout(getToken(identity));
+        } catch(WebApplicationException ex) {
+            log.error("Errore durante la chiamata", ex);
+            return ex.getResponse();
+        }
+        
     }
 
     
@@ -123,7 +137,13 @@ public class ApiGatewayResource {
     public Response recuperaDatiCliente() {
         log.info(("Inoltro richiesta recupero dati cliente"));
         String username = identity.getPrincipal().getName();
-        return clienteRestClient.recuperaDatiCliente(username);
+        try {
+            return clienteRestClient.recuperaDatiCliente(username);
+        } catch (WebApplicationException ex) {
+            log.error("Errore durante la chiamata", ex);
+            return ex.getResponse();
+        }
+        
     }
 
     @GET
@@ -133,7 +153,13 @@ public class ApiGatewayResource {
     public Response recuperaListaIbanCliente() {
         log.info(("Inoltro richiesta recupero lista iban del cliente cliente"));
         String username = identity.getPrincipal().getName();
-        return clienteRestClient.recuperaListaIbanCliente(username);
+        try {
+            return clienteRestClient.recuperaListaIbanCliente(username);
+        } catch(WebApplicationException ex) {
+            log.error("Errore durante la chiamata", ex);
+            return ex.getResponse();
+        }
+        
     }
 
 
@@ -145,8 +171,14 @@ public class ApiGatewayResource {
     public Response aggiornaResidenza( RichiediAggiornamentoResidenzaRequest req) {
         log.info(("Inoltro richiesta aggiornamento residenza"));
         String username = identity.getPrincipal().getName();
-        clienteRestClient.aggiornaResidenza(username, req);
-        return Response.noContent().build();
+        try {
+            clienteRestClient.aggiornaResidenza(username, req);
+            return Response.noContent().build();
+        } catch(WebApplicationException ex) {
+            log.error("Errore durante la chiamata", ex);
+            return ex.getResponse();
+        }
+  
     }
 
     @Path("/clienti/telefono")
@@ -156,9 +188,15 @@ public class ApiGatewayResource {
     @Consumes(value = MediaType.APPLICATION_JSON)
     public Response aggiornaTelefono( RichiediAggiornamentoTelefonoRequest req) {
         log.info(("Inoltro richiesta aggiornamento telefono"));
-         String username = identity.getPrincipal().getName();
-        clienteRestClient.aggiornaTelefono(username, req);
-        return Response.noContent().build();
+        String username = identity.getPrincipal().getName();
+        try {
+            clienteRestClient.aggiornaTelefono(username, req);
+            return Response.noContent().build();
+        } catch(WebApplicationException ex) {
+            log.error("Errore durante la chiamata", ex);
+            return ex.getResponse();
+        }
+        
     }
 
     @Path("/clienti/email")
@@ -169,8 +207,14 @@ public class ApiGatewayResource {
     public Response aggiornaEmail( RichiediAggiornamentoEmailRequest req) {
         log.info(("Inoltro richiesta aggiornamento email"));
         String username = identity.getPrincipal().getName();
-        clienteRestClient.aggiornaEmail(username, req);
-        return Response.noContent().build();
+        try {
+            clienteRestClient.aggiornaEmail(username, req);
+            return Response.noContent().build();
+        } catch(WebApplicationException ex) {
+            log.error("Errore durante la chiamata", ex);
+            return ex.getResponse();
+        }
+        
     }
 
     /**********************************************
@@ -183,7 +227,14 @@ public class ApiGatewayResource {
     @RolesAllowed("cliente")
     public Response recuperaDatiIban(@PathParam(value = "iban") String iban) {
         log.info(("Inoltro richiesta recupero dati iban"));
-        return ccRestClient.recuperaContoCorrenteDaIban(iban);
+        try {
+            String username = identity.getPrincipal().getName();
+            return ccRestClient.recuperaContoCorrenteDaIban(iban, username);
+        } catch(WebApplicationException ex) {
+            log.error("Errore durante la chiamata", ex);
+            return ex.getResponse();
+        }
+        
     }
 
     @Path("/cc")
@@ -194,8 +245,13 @@ public class ApiGatewayResource {
     public Response creaContoCorrente() {
         log.info(("Inoltro richiesta apertura di un nuovo conto corrente"));
         String username = identity.getPrincipal().getName();
-        return ccRestClient.creaContoCorrente(new CreaContoCorrenteRequest(username));
+         try {
+            return ccRestClient.creaContoCorrente(username);
+        } catch(WebApplicationException ex) {
+            log.error("Errore durante la chiamata", ex);
+            return ex.getResponse();
         }
+    }
 
     
     @Path("/cc/soglia-bonifico-giornaliera")
@@ -207,7 +263,7 @@ public class ApiGatewayResource {
         try {
             log.info(("Inoltro richiesta aggiornamento soglia bonifico giornaliera"));
             String username = identity.getPrincipal().getName();
-            return ccRestClient.impostaSogliaBonificoGiornaliera(new ImpostaSogliaBonificoClientRequest(request.getIban(), username, request.getNuovaSoglia()));
+            return ccRestClient.impostaSogliaBonificoGiornaliera(username, new ImpostaSogliaBonificoClientRequest(request.getIban(), request.getNuovaSoglia()));
         } catch (WebApplicationException ex) {
             log.error("Errore durante l'aggiornamento della soglia bonifico giornaliera", ex.getMessage());
             return ex.getResponse();
@@ -223,7 +279,7 @@ public class ApiGatewayResource {
         try {
             log.info(("Inoltro richiesta aggiornamento soglia bonifico mensile"));
             String username = identity.getPrincipal().getName();
-            return ccRestClient.impostaSogliaBonificoMensile(new ImpostaSogliaBonificoClientRequest(request.getIban(), username, request.getNuovaSoglia()));
+            return ccRestClient.impostaSogliaBonificoMensile(username, new ImpostaSogliaBonificoClientRequest(request.getIban(), request.getNuovaSoglia()));
         } catch (WebApplicationException ex) {
             log.error("Errore durante l'aggiornamento della soglia bonifico mensile", ex.getMessage());
             return ex.getResponse();
@@ -240,7 +296,7 @@ public class ApiGatewayResource {
         try {
             log.info(("Inoltro richiesta predisposizione bonifico"));
             String username = identity.getPrincipal().getName();
-            return ccRestClient.predisponiBonifico(new InviaBonificoClientRequest(username, request.getIbanMittente(), request.getIbanDestinatario(), request.getImporto(), request.getCausale()));
+            return ccRestClient.predisponiBonifico(username, new InviaBonificoClientRequest(username, request.getIbanMittente(), request.getIbanDestinatario(), request.getImporto(), request.getCausale()));
         } catch (WebApplicationException ex) {
             log.error("Errore durante la predisposizione del bonifico", ex.getMessage());
             return ex.getResponse();
@@ -283,7 +339,14 @@ public class ApiGatewayResource {
     @RolesAllowed("cliente")
     public Response recuperaDatiCarta(@PathParam(value = "numeroCarta") String numeroCarta) {
         log.info(("Inoltro richiesta recupero dati carta"));
-        return cartaRestClient.recuperaCartaDaNumeroCarta(numeroCarta);
+        try {
+            String username = identity.getPrincipal().getName();
+            return cartaRestClient.recuperaCartaDaNumeroCarta(username, numeroCarta);
+        } catch(WebApplicationException ex) {
+            log.error("Errore durante la chiamata", ex);
+            return ex.getResponse();
+        }
+        
     }
 
     @GET
@@ -292,7 +355,13 @@ public class ApiGatewayResource {
     @RolesAllowed("cliente")
     public Response recuperaCarteDaIban(@PathParam(value = "iban") String iban) {
         log.info(("Inoltro richiesta recupero carte da iban"));
-        return cartaRestClient.recuperaCarteDaIban(iban);
+        try {
+            String username = identity.getPrincipal().getName();
+            return cartaRestClient.recuperaCarteDaIban(username, iban);
+        } catch(WebApplicationException ex) {
+            log.error("Errore durante la chiamata", ex);
+            return ex.getResponse();
+        }
     }
 
     @Path("/carte")
@@ -303,8 +372,13 @@ public class ApiGatewayResource {
     public Response creaCarta(CreaCartaRequest request) {
         log.info(("Inoltro richiesta creazione di una nuova carta"));
         String username = identity.getPrincipal().getName();
-        return cartaRestClient.creaCarta(new CreaCartaClientRequest(username, request.getIban()));
+        try {
+            return cartaRestClient.creaCarta(username, new CreaCartaClientRequest(request.getIban()));
+        } catch(WebApplicationException ex) {
+            log.error("Errore durante la chiamata", ex);
+            return ex.getResponse();
         }
+    }
 
     
     @Path("/carte/soglia-pagamenti-giornaliera")
@@ -316,7 +390,7 @@ public class ApiGatewayResource {
         try {
             log.info(("Inoltro richiesta aggiornamento soglia pagamenti giornaliera"));
             String username = identity.getPrincipal().getName();
-            return cartaRestClient.impostaSogliaPagamentiGiornaliera(new ImpostaSogliaPagamentiClientRequest(request.getNumeroCarta(), request.getIban(), username, request.getNuovaSoglia()));
+            return cartaRestClient.impostaSogliaPagamentiGiornaliera(username, new ImpostaSogliaPagamentiClientRequest(request.getNumeroCarta(), request.getIban(), request.getNuovaSoglia()));
         } catch (WebApplicationException ex) {
             log.error("Errore durante l'aggiornamento della soglia bonifico giornaliera", ex.getMessage());
             return ex.getResponse();
@@ -332,7 +406,7 @@ public class ApiGatewayResource {
         try {
             log.info(("Inoltro richiesta aggiornamento soglia pagamenti mensile"));
             String username = identity.getPrincipal().getName();
-            return cartaRestClient.impostaSogliaPagamentiMensile(new ImpostaSogliaPagamentiClientRequest(request.getNumeroCarta(), request.getIban(), username, request.getNuovaSoglia()));
+            return cartaRestClient.impostaSogliaPagamentiMensile(username, new ImpostaSogliaPagamentiClientRequest(request.getNumeroCarta(), request.getIban(), request.getNuovaSoglia()));
         } catch (WebApplicationException ex) {
             log.error("Errore durante l'aggiornamento della soglia bonifico giornaliera", ex.getMessage());
             return ex.getResponse();
@@ -349,7 +423,7 @@ public class ApiGatewayResource {
         try {
             log.info(("Inoltro richiesta settaggio abilitazione pagamenti online"));
             String username = identity.getPrincipal().getName();
-            return cartaRestClient.impostaAbilitazionePagamentiOnline(new ImpostaAbilitazionePagamentiOnlineClientRequest(request.getNumeroCarta(), request.getIban(), username, request.isAbilitazionePagamentiOnline()));
+            return cartaRestClient.impostaAbilitazionePagamentiOnline(username, new ImpostaAbilitazionePagamentiOnlineClientRequest(request.getNumeroCarta(), request.getIban(), request.isAbilitazionePagamentiOnline()));
         } catch (WebApplicationException ex) {
             log.error("Errore durante l'aggiornamento della soglia bonifico giornaliera", ex.getMessage());
             return ex.getResponse();
@@ -365,7 +439,7 @@ public class ApiGatewayResource {
         try {
             log.info("Inoltro richiesta settaggio stato della carta");
             String username = identity.getPrincipal().getName();
-            return cartaRestClient.impostaStatoCarta(new ImpostaStatoCartaClientRequest(request.getNumeroCarta(), request.getIban(), username, request.isStatoCarta()));
+            return cartaRestClient.impostaStatoCarta(username, new ImpostaStatoCartaClientRequest(request.getNumeroCarta(), request.getIban(), request.isStatoCarta()));
         } catch (WebApplicationException ex) {
             log.error("Errore durante l'aggiornamento dello stato della carta", ex.getMessage());
             return ex.getResponse();

@@ -17,7 +17,6 @@ import jakarta.ws.rs.QueryParam;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import neo.bank.gateway.domain.enums.TipologiaFlusso;
-import neo.bank.gateway.framework.adapter.input.rest.request.CreaContoCorrenteRequest;
 import neo.bank.gateway.framework.adapter.output.rest.request.ImpostaSogliaBonificoClientRequest;
 import neo.bank.gateway.framework.adapter.output.rest.request.InviaBonificoClientRequest;
 
@@ -28,28 +27,28 @@ public interface ContoCorrenteRestClient {
     @Path("/{iban}")
     @GET
     @Produces(value = MediaType.APPLICATION_JSON)
-    public Response recuperaContoCorrenteDaIban(@PathParam(value = "iban") String iban);
+    public Response recuperaContoCorrenteDaIban(@PathParam(value = "iban") String iban, @HeaderParam("X-Authenticated-User") String authenticatedUser);
 
 
     @POST
     @Produces(value = MediaType.APPLICATION_JSON)
-    public Response creaContoCorrente(CreaContoCorrenteRequest cmd);
+    public Response creaContoCorrente(@HeaderParam("X-Authenticated-User") String authenticatedUser);
 
     @Path("/soglia-bonifico-giornaliera")
     @PUT
     @Produces(value = MediaType.APPLICATION_JSON)
-    public Response impostaSogliaBonificoGiornaliera(ImpostaSogliaBonificoClientRequest request);
+    public Response impostaSogliaBonificoGiornaliera(@HeaderParam("X-Authenticated-User") String authenticatedUser, ImpostaSogliaBonificoClientRequest request);
 
     @Path("/soglia-bonifico-mensile")
     @PUT
     @Produces(value = MediaType.APPLICATION_JSON)
-    public Response impostaSogliaBonificoMensile(ImpostaSogliaBonificoClientRequest request);
+    public Response impostaSogliaBonificoMensile(@HeaderParam("X-Authenticated-User") String authenticatedUser, ImpostaSogliaBonificoClientRequest request);
 
 
     @Path("/predisponi-bonifico")
     @POST
     @Produces(value = MediaType.APPLICATION_JSON)
-    public Response predisponiBonifico(InviaBonificoClientRequest request);
+    public Response predisponiBonifico(@HeaderParam("X-Authenticated-User") String authenticatedUser, InviaBonificoClientRequest request);
 
 
     @GET

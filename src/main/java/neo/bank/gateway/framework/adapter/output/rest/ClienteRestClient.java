@@ -6,9 +6,9 @@ import org.eclipse.microprofile.rest.client.inject.RegisterRestClient;
 
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.GET;
+import jakarta.ws.rs.HeaderParam;
 import jakarta.ws.rs.PUT;
 import jakarta.ws.rs.Path;
-import jakarta.ws.rs.PathParam;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
@@ -21,33 +21,32 @@ import neo.bank.gateway.framework.adapter.input.rest.request.RichiediAggiornamen
 public interface ClienteRestClient {
 
     @GET
-    @Path("/{username}")
     @Produces(MediaType.APPLICATION_JSON)
-    public Response recuperaDatiCliente(@PathParam(value = "username") String username);
+    public Response recuperaDatiCliente(@HeaderParam("X-Authenticated-User") String authenticatedUser);
 
     @GET
-    @Path("/{username}/iban")
+    @Path("/iban")
     @Produces(MediaType.APPLICATION_JSON)
-    public Response recuperaListaIbanCliente(@PathParam(value = "username") String username);
+    public Response recuperaListaIbanCliente(@HeaderParam("X-Authenticated-User") String authenticatedUser);
 
 
-    @Path("/{username}/residenza")
+    @Path("/residenza")
     @Tag(name="Endpoints Clienti")
     @PUT // Sarebbe piu' corretto PATCH ma quarkus non lo supporta
     @Consumes(value = MediaType.APPLICATION_JSON)
-    public Response aggiornaResidenza(@PathParam(value = "username") String username,  RichiediAggiornamentoResidenzaRequest req);
+    public Response aggiornaResidenza( @HeaderParam("X-Authenticated-User") String authenticatedUser,  RichiediAggiornamentoResidenzaRequest req);
 
-    @Path("/{username}/telefono")
+    @Path("/telefono")
     @Tag(name="Endpoints Clienti")
     @PUT // Sarebbe piu' corretto PATCH ma quarkus non lo supporta
     @Consumes(value = MediaType.APPLICATION_JSON)
-    public Response aggiornaTelefono(@PathParam(value = "username") String username,  RichiediAggiornamentoTelefonoRequest req);
+    public Response aggiornaTelefono( @HeaderParam("X-Authenticated-User") String authenticatedUser,  RichiediAggiornamentoTelefonoRequest req);
 
-    @Path("/{username}/email")
+    @Path("/email")
     @PUT // Sarebbe piu' corretto PATCH ma quarkus non lo supporta
     @Tag(name="Endpoints Clienti")
     @Consumes(value = MediaType.APPLICATION_JSON)
-    public Response aggiornaEmail(@PathParam(value = "username") String username,  RichiediAggiornamentoEmailRequest req);
+    public Response aggiornaEmail( @HeaderParam("X-Authenticated-User") String authenticatedUser,  RichiediAggiornamentoEmailRequest req);
     
 
 }

@@ -4,6 +4,7 @@ package neo.bank.gateway.framework.adapter.output.rest;
 import org.eclipse.microprofile.rest.client.inject.RegisterRestClient;
 
 import jakarta.ws.rs.GET;
+import jakarta.ws.rs.HeaderParam;
 import jakarta.ws.rs.POST;
 import jakarta.ws.rs.PUT;
 import jakarta.ws.rs.Path;
@@ -22,35 +23,35 @@ public interface CartaRestClient {
 
     @POST
     @Produces(value = MediaType.APPLICATION_JSON)
-    public Response creaCarta(CreaCartaClientRequest request);
+    public Response creaCarta(@HeaderParam("X-Authenticated-User") String authenticatedUser, CreaCartaClientRequest request);
 
     @Path("/{numeroCarta}")
     @GET
     @Produces(value = MediaType.APPLICATION_JSON)
-    public Response recuperaCartaDaNumeroCarta(@PathParam(value = "numeroCarta") String numeroCarta);
+    public Response recuperaCartaDaNumeroCarta(@HeaderParam("X-Authenticated-User") String authenticatedUser, @PathParam(value = "numeroCarta") String numeroCarta);
 
     @Path("/soglia-pagamenti-giornaliera")
     @PUT
     @Produces(value = MediaType.APPLICATION_JSON)
-    public Response impostaSogliaPagamentiGiornaliera( ImpostaSogliaPagamentiClientRequest request);
+    public Response impostaSogliaPagamentiGiornaliera(@HeaderParam("X-Authenticated-User") String authenticatedUser, ImpostaSogliaPagamentiClientRequest request);
 
     @Path("/soglia-pagamenti-mensile")
     @PUT
     @Produces(value = MediaType.APPLICATION_JSON)
-    public Response impostaSogliaPagamentiMensile(ImpostaSogliaPagamentiClientRequest request);
+    public Response impostaSogliaPagamentiMensile(@HeaderParam("X-Authenticated-User") String authenticatedUser, ImpostaSogliaPagamentiClientRequest request);
 
     @Path("/abilitazione-pagamenti-online")
     @PUT
     @Produces(value = MediaType.APPLICATION_JSON)
-    public Response impostaAbilitazionePagamentiOnline( ImpostaAbilitazionePagamentiOnlineClientRequest request);
+    public Response impostaAbilitazionePagamentiOnline(@HeaderParam("X-Authenticated-User") String authenticatedUser, ImpostaAbilitazionePagamentiOnlineClientRequest request);
 
     @Path("/stato-carta")
     @PUT
     @Produces(value = MediaType.APPLICATION_JSON)
-    public Response impostaStatoCarta( ImpostaStatoCartaClientRequest request);
+    public Response impostaStatoCarta(@HeaderParam("X-Authenticated-User") String authenticatedUser, ImpostaStatoCartaClientRequest request);
     
     @Path("/iban/{iban}")
     @GET
     @Produces(value = MediaType.APPLICATION_JSON)
-    public Response recuperaCarteDaIban(@PathParam(value = "iban") String iban);
+    public Response recuperaCarteDaIban(@HeaderParam("X-Authenticated-User") String authenticatedUser, @PathParam(value = "iban") String iban);
 }

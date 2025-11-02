@@ -12,6 +12,5 @@ import lombok.Setter;
 public class ImpostaStatoCartaClientRequest {
     private String numeroCarta;
     private String iban;
-    private String usernameCliente;
     private boolean statoCarta;
 }
