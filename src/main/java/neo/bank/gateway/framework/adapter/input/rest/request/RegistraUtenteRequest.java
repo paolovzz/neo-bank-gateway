@@ -12,7 +12,6 @@ public class RegistraUtenteRequest {
     private String cognome;
     private String email;
     private LocalDate dataNascita;
-    private String luogoNascita;
     private String residenza;
     private String password;
     private String telefono;

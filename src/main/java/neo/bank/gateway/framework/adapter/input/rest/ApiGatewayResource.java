@@ -1,6 +1,5 @@
 package neo.bank.gateway.framework.adapter.input.rest;
 
-import java.security.Principal;
 import java.time.LocalDate;
 
 import org.eclipse.microprofile.openapi.annotations.parameters.RequestBody;
@@ -8,12 +7,12 @@ import org.eclipse.microprofile.openapi.annotations.tags.Tag;
 import org.eclipse.microprofile.rest.client.inject.RestClient;
 
 import io.quarkus.security.identity.SecurityIdentity;
-import io.smallrye.jwt.auth.principal.JWTCallerPrincipal;
 import jakarta.annotation.security.RolesAllowed;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.DefaultValue;
 import jakarta.ws.rs.GET;
+import jakarta.ws.rs.HeaderParam;
 import jakarta.ws.rs.POST;
 import jakarta.ws.rs.PUT;
 import jakarta.ws.rs.Path;
@@ -112,17 +111,16 @@ public class ApiGatewayResource {
     @Path("/auth/logout")
     @Tag(name="Endpoints IAM")
     @RolesAllowed("cliente")
-    public Response logout() {
+    public Response logout(@HeaderParam("Authorization") String authorizationHeader) {
         try {
             log.info(("Inoltro richiesta logout utente"));
-            return authRestClient.logout(getToken(identity));
+            return authRestClient.logout(authorizationHeader);
         } catch(WebApplicationException ex) {
             log.error("Errore durante la chiamata", ex);
             return ex.getResponse();
         }
         
     }
-
     
 
     /**********************************************
@@ -244,8 +242,8 @@ public class ApiGatewayResource {
     @RolesAllowed("cliente")
     public Response creaContoCorrente() {
         log.info(("Inoltro richiesta apertura di un nuovo conto corrente"));
-        String username = identity.getPrincipal().getName();
          try {
+            String username = identity.getPrincipal().getName();
             return ccRestClient.creaContoCorrente(username);
         } catch(WebApplicationException ex) {
             log.error("Errore durante la chiamata", ex);
@@ -259,7 +257,7 @@ public class ApiGatewayResource {
     @Produces(value = MediaType.APPLICATION_JSON)
     @Tag(name="Endpoints Conti Correnti")
     @RolesAllowed("cliente")
-    public Response impostaSogliaBonificoGiornaliera( ImpostaSogliaBonificoRequest request){
+    public Response impostaSogliaBonificoGiornaliera(ImpostaSogliaBonificoRequest request){
         try {
             log.info(("Inoltro richiesta aggiornamento soglia bonifico giornaliera"));
             String username = identity.getPrincipal().getName();
@@ -296,7 +294,7 @@ public class ApiGatewayResource {
         try {
             log.info(("Inoltro richiesta predisposizione bonifico"));
             String username = identity.getPrincipal().getName();
-            return ccRestClient.predisponiBonifico(username, new InviaBonificoClientRequest(username, request.getIbanMittente(), request.getIbanDestinatario(), request.getImporto(), request.getCausale()));
+            return ccRestClient.predisponiBonifico(username, new InviaBonificoClientRequest(request.getIbanMittente(), request.getIbanDestinatario(), request.getImporto(), request.getCausale()));
         } catch (WebApplicationException ex) {
             log.error("Errore durante la predisposizione del bonifico", ex.getMessage());
             return ex.getResponse();
@@ -446,18 +444,4 @@ public class ApiGatewayResource {
         }
     }
 
-
-
-    //****************************************************************************** */
-
-    private String getToken(SecurityIdentity identity) {
-        Principal principal = identity.getPrincipal();
-        if (principal instanceof JWTCallerPrincipal) {
-            JWTCallerPrincipal jwtPrincipal = (JWTCallerPrincipal) principal;
-            String token = jwtPrincipal.getRawToken();
-            return token;
-        } else {
-            return "Nessun token disponibile";
-        }
-    }
 }

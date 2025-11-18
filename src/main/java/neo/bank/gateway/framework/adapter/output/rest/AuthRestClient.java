@@ -33,4 +33,9 @@ public interface AuthRestClient {
     @Consumes(MediaType.APPLICATION_JSON)
     public Response logout(@HeaderParam("Authorization") String authorizationHeader);
 
+    @POST
+    @Path("/verifica-token")
+    @Consumes(MediaType.APPLICATION_JSON)
+    public Response verificaToken(@HeaderParam("Authorization") String authorizationHeader);
+
 }
