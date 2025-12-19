@@ -11,6 +11,5 @@ import lombok.Setter;
 @Setter
 public class ImpostaSogliaPagamentiClientRequest {
     private String numeroCarta;
-    private String iban;
     private int nuovaSoglia;
 }

@@ -11,6 +11,5 @@ import lombok.Setter;
 @Setter
 public class ImpostaAbilitazionePagamentiOnlineClientRequest {
     private String numeroCarta;
-    private String iban;
     private boolean abilitazionePagamentiOnline;
 }

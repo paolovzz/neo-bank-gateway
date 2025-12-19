@@ -388,7 +388,7 @@ public class ApiGatewayResource {
         try {
             log.info(("Inoltro richiesta aggiornamento soglia pagamenti giornaliera"));
             String username = identity.getPrincipal().getName();
-            return cartaRestClient.impostaSogliaPagamentiGiornaliera(username, new ImpostaSogliaPagamentiClientRequest(request.getNumeroCarta(), request.getIban(), request.getNuovaSoglia()));
+            return cartaRestClient.impostaSogliaPagamentiGiornaliera(username, new ImpostaSogliaPagamentiClientRequest(request.getNumeroCarta(), request.getNuovaSoglia()));
         } catch (WebApplicationException ex) {
             log.error("Errore durante l'aggiornamento della soglia bonifico giornaliera", ex.getMessage());
             return ex.getResponse();
@@ -404,7 +404,7 @@ public class ApiGatewayResource {
         try {
             log.info(("Inoltro richiesta aggiornamento soglia pagamenti mensile"));
             String username = identity.getPrincipal().getName();
-            return cartaRestClient.impostaSogliaPagamentiMensile(username, new ImpostaSogliaPagamentiClientRequest(request.getNumeroCarta(), request.getIban(), request.getNuovaSoglia()));
+            return cartaRestClient.impostaSogliaPagamentiMensile(username, new ImpostaSogliaPagamentiClientRequest(request.getNumeroCarta(), request.getNuovaSoglia()));
         } catch (WebApplicationException ex) {
             log.error("Errore durante l'aggiornamento della soglia bonifico giornaliera", ex.getMessage());
             return ex.getResponse();
@@ -421,7 +421,7 @@ public class ApiGatewayResource {
         try {
             log.info(("Inoltro richiesta settaggio abilitazione pagamenti online"));
             String username = identity.getPrincipal().getName();
-            return cartaRestClient.impostaAbilitazionePagamentiOnline(username, new ImpostaAbilitazionePagamentiOnlineClientRequest(request.getNumeroCarta(), request.getIban(), request.isAbilitazionePagamentiOnline()));
+            return cartaRestClient.impostaAbilitazionePagamentiOnline(username, new ImpostaAbilitazionePagamentiOnlineClientRequest(request.getNumeroCarta(), request.isAbilitazionePagamentiOnline()));
         } catch (WebApplicationException ex) {
             log.error("Errore durante l'aggiornamento della soglia bonifico giornaliera", ex.getMessage());
             return ex.getResponse();
@@ -437,7 +437,7 @@ public class ApiGatewayResource {
         try {
             log.info("Inoltro richiesta settaggio stato della carta");
             String username = identity.getPrincipal().getName();
-            return cartaRestClient.impostaStatoCarta(username, new ImpostaStatoCartaClientRequest(request.getNumeroCarta(), request.getIban(), request.isStatoCarta()));
+            return cartaRestClient.impostaStatoCarta(username, new ImpostaStatoCartaClientRequest(request.getNumeroCarta(), request.isStatoCarta()));
         } catch (WebApplicationException ex) {
             log.error("Errore durante l'aggiornamento dello stato della carta", ex.getMessage());
             return ex.getResponse();
